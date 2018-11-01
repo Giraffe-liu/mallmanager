@@ -2,12 +2,12 @@
     <div class="login-wrap">
         <el-form class="login-form" label-position="top" label-width="80px" :model="formData">
             <el-form-item label="用户名">
-                <el-input v-model="formData.name"></el-input>
+                <el-input v-model="formData.username"></el-input>
             </el-form-item>
             <el-form-item label="密码">
                 <el-input v-model="formData.password"></el-input>
             </el-form-item>
-            <el-button @click.prevent="handleLogin" class="login-button" type="primary">登录</el-button>
+            <el-button @click="handleLogin" class="login-button" type="primary">登录</el-button>
         </el-form>
     </div>
 </template>
@@ -16,20 +16,25 @@ export default {
   data () {
     return {
       formData: {
-        name: '',
+        username: '',
         password: ''
       }
     }
   },
   methods: {
     // 验证登录
-    handleLogin () {
-      this.$http.post('login', this.formData).then(res => {
-        const { meta } = res
-        if (meta.status === 200) {
-          console.log(meta)
+    async handleLogin () {
+      await this.$http.post('login', this.formData).then(res => {
+        const { data } = res
+        const { meta: {status, msg} } = data
+        if (status === 200) {
+        //   获取数据中的token
+          const token = data.data.token
+        //   将token存储在sessionStorage中
+          sessionStorage.setItem('token',token)
+          this.$message.success(msg)
         } else {
-          this.$message.error(meta.msg)
+          this.$message.error(msg)
         }
       })
     }

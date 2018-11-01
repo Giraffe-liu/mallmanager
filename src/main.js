@@ -4,13 +4,13 @@ import Vue from 'vue'
 import ElementUI from 'element-ui'
 import '../node_modules/element-ui/lib/theme-chalk/index.css'
 import '@/assets/css/style.css'
-import http from '@/assets/plugins/http.js'
+import httpHelper from '@/assets/plugins/http.js'
 import App from './App'
 import router from './router'
 
 Vue.config.productionTip = false
 Vue.use(ElementUI)
-Vue.use(http)
+Vue.use(httpHelper)
 
 /* eslint-disable no-new */
 new Vue({
