@@ -44,7 +44,7 @@
         <el-table-column label="操作">
             <!-- 操作按钮 -->
             <template slot-scope="scope">
-                <el-button plain size="mini" type="primary" icon="el-icon-edit" circle></el-button>
+                <el-button @click="editUserDialog(scope.row.id)" plain size="mini" type="primary" icon="el-icon-edit" circle></el-button>
                 <el-button @click="handleDel(scope.row)" plain size="mini" type="danger" icon="el-icon-delete" circle></el-button>
                 <el-button plain size="mini" type="success" icon="el-icon-check" circle></el-button>
             </template>
@@ -63,7 +63,7 @@
     <!-- 添加用户的对话框 -->
     <el-dialog title="添加用户" :visible.sync="addDialog">
         <el-form :model="formData">
-            <el-form-item label="姓名" label-width="100px">
+            <el-form-item label="用户名" label-width="100px">
                 <el-input v-model="formData.username" autocomplete="off"></el-input>
             </el-form-item>
             <el-form-item label="密码" label-width="100px">
@@ -79,6 +79,24 @@
         <div slot="footer" class="dialog-footer">
             <el-button @click="addDialog = false">取 消</el-button>
             <el-button @click="handleAdd">确 定</el-button>
+        </div>
+    </el-dialog>
+    <!-- 编辑用户的对话框 -->
+    <el-dialog title="编辑用户" :visible.sync="editDialog">
+        <el-form :model="formData">
+            <el-form-item label="用户名" label-width="100px">
+                <el-input disabled v-model="formData.username" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="电话" label-width="100px">
+                <el-input v-model="formData.mobile" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="邮箱" label-width="100px">
+                <el-input v-model="formData.email" autocomplete="off"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="editDialog = false">取 消</el-button>
+            <el-button @click="handleEdit()">确 定</el-button>
         </div>
     </el-dialog>
 </el-card>
@@ -105,10 +123,38 @@ export default {
         email: '',
         mobile: ''
       },
-      addDialog: false
+      addDialog: false,
+      // 编辑用户对话框中的属性
+      editDialog: false
     }
   },
   methods: {
+    // 处理编辑功能
+    async handleEdit () {
+      await this.$http.put(`users/${this.formData.id}`, this.formData)
+        .then(res => {
+          console.log(res)
+          const {meta: {msg, status}} = res.data
+          if (status === 200) {
+            this.$message.success(msg)
+            this.editDialog = false
+            this.formData = {}
+            this.loadData()
+          } else {
+            this.$message.error(msg)
+          }
+        })
+    },
+    // 渲染编辑用户对话框
+    async editUserDialog (id) {
+      this.editDialog = true
+      await this.$http.get(`users/${id}`)
+        .then(res => {
+          const data = res.data
+          console.log(data)
+          this.formData = data.data
+        })
+    },
     // 处理添加用户
     async handleAdd () {
       this.$http.defaults.headers.common['Authorization'] = sessionStorage.getItem('token')
