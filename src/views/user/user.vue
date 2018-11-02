@@ -9,8 +9,8 @@
     <!-- 搜索框 -->
     <el-row class="searchArea">
         <el-col :span="24">
-            <el-input class="searchInput" clearable placeholder="请输入内容">
-                <el-button slot="append" icon="el-icon-search"></el-button>
+            <el-input v-model="searchVal" class="searchInput" clearable placeholder="请输入内容">
+                <el-button slot="append" icon="el-icon-search" @click="handleSearch()"></el-button>
             </el-input>
             <el-button type="success" plain>添加用户</el-button>
         </el-col>
@@ -73,13 +73,22 @@ export default {
       pagesize: 2,
       total: 0,
       // 加载动画属性
-      loading: true
+      loading: true,
+      // 搜索关键字
+      searchVal: ''
     }
   },
   created () {
     this.loadData()
   },
   methods: {
+    // 处理搜索功能
+    handleSearch () {
+      // 将pagenum和pagesize的值再次设置为初始值，这样数据才会从第一页开始展示
+      this.pagenum = 1
+      this.pagesize = 2
+      this.loadData()
+    },
     // 处理当前展示的是第几页
     handleCurrentChange (val) {
       this.pagenum = val
@@ -101,7 +110,8 @@ export default {
         },
         params: {
           pagenum: this.pagenum,
-          pagesize: this.pagesize
+          pagesize: this.pagesize,
+          query: this.searchVal
         }
       })
       this.loading = false
