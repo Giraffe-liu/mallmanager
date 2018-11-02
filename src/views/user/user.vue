@@ -47,6 +47,16 @@
                 </template>
             </el-table-column>
         </el-table>
+        <!-- 分页 -->
+        <el-pagination
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+        :current-page="pagenum"
+        :page-sizes="[100, 200, 300, 400]"
+        :page-size="pagesize"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="total">
+        </el-pagination>
     </template>
 </el-card>
 </template>
@@ -55,13 +65,22 @@
 export default {
   data () {
     return {
-      list: []
+      list: [],
+      pagenum: 1,
+      pagesize: 2,
+      total: 0
     }
   },
   created () {
     this.loadData()
   },
   methods: {
+    handleCurrentChange (val) {
+      console.log(val)
+    },
+    handleSizeChange (val) {
+      console.log(val)
+    },
     async loadData () {
       const res = await this.$http.get('users', {
         headers: {
