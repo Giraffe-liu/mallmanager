@@ -12,7 +12,7 @@
             <el-input v-model="searchVal" class="searchInput" clearable placeholder="请输入内容">
                 <el-button slot="append" icon="el-icon-search" @click="handleSearch()"></el-button>
             </el-input>
-            <el-button type="success" plain>添加用户</el-button>
+            <el-button @click="addUserDialog" type="success" plain>添加用户</el-button>
         </el-col>
     </el-row>
     <!-- 表格 -->
@@ -60,6 +60,27 @@
     layout="total, sizes, prev, pager, next, jumper"
     :total="total">
     </el-pagination>
+    <!-- 添加用户的对话框 -->
+    <el-dialog title="添加用户" :visible.sync="addDialog">
+        <el-form :model="formData">
+            <el-form-item label="姓名" label-width="100px">
+                <el-input v-model="formData.username" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="密码" label-width="100px">
+                <el-input v-model="formData.password" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="电话" label-width="100px">
+                <el-input v-model="formData.mobile" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="邮箱" label-width="100px">
+                <el-input v-model="formData.email" autocomplete="off"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="addDialog = false">取 消</el-button>
+            <el-button @click="handleAdd">确 定</el-button>
+        </div>
+    </el-dialog>
 </el-card>
 </template>
 
@@ -76,10 +97,38 @@ export default {
       // 加载动画属性
       loading: true,
       // 搜索关键字
-      searchVal: ''
+      searchVal: '',
+      // 添加用户对话框中的属性
+      formData: {
+        username: '',
+        password: '',
+        email: '',
+        mobile: ''
+      },
+      addDialog: false
     }
   },
   methods: {
+    // 处理添加用户
+    async handleAdd () {
+      this.$http.defaults.headers.common['Authorization'] = sessionStorage.getItem('token')
+      await this.$http.post('users', this.formData)
+        .then(res => {
+          const {meta: {msg, status}} = res.data
+          if (status === 201) {
+            this.$message.success(msg)
+            this.addDialog = false
+            this.formData = {}
+            this.loadData()
+          } else {
+            this.$message.error(msg)
+          }
+        })
+    },
+    // 渲染添加用户对话框
+    addUserDialog () {
+      this.addDialog = true
+    },
     // 删除用户信息
     handleDel (user) {
       this.$http.defaults.headers.common['Authorization'] = sessionStorage.getItem('token')
