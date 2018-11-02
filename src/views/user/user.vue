@@ -34,6 +34,7 @@
             <!-- 用户状态开关 -->
             <template slot-scope="scope">
                 <el-switch
+                @change="handleChangeUserStatus(scope.row)"
                 v-model="scope.row.mg_state"
                 active-color="#13ce66"
                 inactive-color="#ff4949">
@@ -78,10 +79,21 @@ export default {
       searchVal: ''
     }
   },
-  created () {
-    this.loadData()
-  },
   methods: {
+    // 处理用户状态改变
+    async handleChangeUserStatus (user) {
+      // this.$http.defaults.headers.common['Authorization'] = sessionStorage.getItem('token')
+      const res = await this.$http.put(`users/${user.id}/state/${user.mg_state}`)
+      // this.loadData()
+      console.log(res)
+      const data = res.data
+      const {meta: {msg, status}} = data
+      if (status === 200) {
+        this.$message.success(msg)
+      } else {
+        this.$message.error(msg)
+      }
+    },
     // 处理搜索功能
     handleSearch () {
       // 将pagenum和pagesize的值再次设置为初始值，这样数据才会从第一页开始展示
@@ -126,6 +138,9 @@ export default {
         this.$message.error(msg)
       }
     }
+  },
+  created () {
+    this.loadData()
   }
 }
 </script>
