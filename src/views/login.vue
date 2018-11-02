@@ -28,11 +28,12 @@ export default {
         const { data } = res
         const { meta: {status, msg} } = data
         if (status === 200) {
-        //   获取数据中的token
+          // 获取数据中的token
           const token = data.data.token
-        //   将token存储在sessionStorage中
-          sessionStorage.setItem('token',token)
+          // 将token存储在sessionStorage中
+          sessionStorage.setItem('token', token)
           this.$message.success(msg)
+          this.$router.push({name: 'home'})
         } else {
           this.$message.error(msg)
         }
