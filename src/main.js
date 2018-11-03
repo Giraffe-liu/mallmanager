@@ -7,11 +7,13 @@ import '@/assets/css/style.css'
 import httpHelper from '@/assets/plugins/http.js'
 import App from './App'
 import router from './router'
+import myBread from '@/component/myBread'
 
 Vue.config.productionTip = false
 Vue.use(ElementUI)
 Vue.use(httpHelper)
 
+Vue.component(myBread.name, myBread)
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
