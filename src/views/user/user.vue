@@ -46,7 +46,7 @@
             <template slot-scope="scope">
                 <el-button @click="editUserDialog(scope.row.id)" plain size="mini" type="primary" icon="el-icon-edit" circle></el-button>
                 <el-button @click="handleDel(scope.row)" plain size="mini" type="danger" icon="el-icon-delete" circle></el-button>
-                <el-button plain size="mini" type="success" icon="el-icon-check" circle></el-button>
+                <el-button @click="RoleDialog(scope.row)" plain size="mini" type="success" icon="el-icon-check" circle></el-button>
             </template>
         </el-table-column>
     </el-table>
@@ -99,6 +99,30 @@
             <el-button @click="handleEdit()">确 定</el-button>
         </div>
     </el-dialog>
+    <!-- 分配角色对话框 -->
+     <el-dialog title="分配角色" :visible.sync="setRoleDialog">
+        <el-form label-width="100px">
+            <el-form-item label="用户名">
+                {{currentUsername}}
+            </el-form-item>
+             <el-form-item label="角色">
+                <el-select v-model="currentRoleId">
+                    <el-option disabled label="请选择" :value="-1">
+                    </el-option>
+                    <el-option
+                    v-for="item in roles"
+                        :key="item.id"
+                        :label="item.roleName"
+                        :value="item.id">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="setRoleDialog = false">取 消</el-button>
+            <el-button @click="handleSetRole()">确 定</el-button>
+        </div>
+    </el-dialog>
 </el-card>
 </template>
 
@@ -110,7 +134,7 @@ export default {
       list: [],
       // 分页相关属性
       pagenum: 1,
-      pagesize: 2,
+      pagesize: 6,
       total: 0,
       // 加载动画属性
       loading: true,
@@ -125,15 +149,48 @@ export default {
       },
       addDialog: false,
       // 编辑用户对话框中的属性
-      editDialog: false
+      editDialog: false,
+      // 分配角色对话框中的属性
+      setRoleDialog: false,
+      currentUsername: '',
+      currentUserId: -1,
+      currentRoleId: -1,
+      roles: []
     }
   },
+  created () {
+    this.loadData()
+  },
   methods: {
+    // 修改用户角色
+    async handleSetRole () {
+      const res = await this.$http.put(`users/${this.currentUserId}/role`, {rid: this.currentRoleId})
+      const {meta: {msg, status}} = res.data
+      if (status === 200) {
+        this.loadData()
+        this.$message.success(msg)
+        this.setRoleDialog = false
+      } else {
+        this.$message.error(msg)
+      }
+      console.log(res)
+    },
+    // 渲染角色分配对话框
+    async RoleDialog (user) {
+      // this.$http.defaults.headers.common['Authorization'] = sessionStorage.getItem('token')
+      this.setRoleDialog = true
+      this.currentUsername = user.username
+      this.currentUserId = user.id
+      console.log(this.currentUserId)
+      const res = await this.$http.get(`users/${user.id}`)
+      this.currentRoleId = res.data.data.rid
+      const res1 = await this.$http.get('roles')
+      this.roles = res1.data.data
+    },
     // 处理编辑功能
     async handleEdit () {
       await this.$http.put(`users/${this.formData.id}`, this.formData)
         .then(res => {
-          console.log(res)
           const {meta: {msg, status}} = res.data
           if (status === 200) {
             this.$message.success(msg)
@@ -151,13 +208,12 @@ export default {
       await this.$http.get(`users/${id}`)
         .then(res => {
           const data = res.data
-          console.log(data)
           this.formData = data.data
         })
     },
     // 处理添加用户
     async handleAdd () {
-      this.$http.defaults.headers.common['Authorization'] = sessionStorage.getItem('token')
+      // this.$http.defaults.headers.common['Authorization'] = sessionStorage.getItem('token')
       await this.$http.post('users', this.formData)
         .then(res => {
           const {meta: {msg, status}} = res.data
@@ -173,11 +229,12 @@ export default {
     },
     // 渲染添加用户对话框
     addUserDialog () {
+      this.formData = {}
       this.addDialog = true
     },
     // 删除用户信息
     handleDel (user) {
-      this.$http.defaults.headers.common['Authorization'] = sessionStorage.getItem('token')
+      // this.$http.defaults.headers.common['Authorization'] = sessionStorage.getItem('token')
       this.$confirm('此操作将永久删除，是否继续', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -185,7 +242,6 @@ export default {
         center: true
       }).then(async () => {
         const res = await this.$http.delete(`users/${user.id}`)
-        console.log(res)
         const {meta: {msg, status}} = res.data
         if (status === 200) {
           this.loadData()
@@ -200,10 +256,8 @@ export default {
     },
     // 处理用户状态改变
     async handleChangeUserStatus (user) {
-      this.$http.defaults.headers.common['Authorization'] = sessionStorage.getItem('token')
+      // this.$http.defaults.headers.common['Authorization'] = sessionStorage.getItem('token')
       const res = await this.$http.put(`users/${user.id}/state/${user.mg_state}`)
-      // this.loadData()
-      console.log(res)
       const data = res.data
       const {meta: {msg, status}} = data
       if (status === 200) {
@@ -223,13 +277,11 @@ export default {
     handleCurrentChange (val) {
       this.pagenum = val
       this.loadData()
-      console.log(this.pagesize)
     },
     // 处理每页有多少条
     handleSizeChange (val) {
       this.pagesize = val
       this.loadData()
-      console.log(this.pagenum)
     },
     // 页面加载完成
     async loadData () {
@@ -256,9 +308,6 @@ export default {
         this.$message.error(msg)
       }
     }
-  },
-  created () {
-    this.loadData()
   }
 }
 </script>
@@ -267,12 +316,10 @@ export default {
 .box-card {
     height: 100%;
 }
-
 .searchArea {
     margin-top: 10px;
     margin-bottom: 10px;
 }
-
 .searchArea .searchInput {
     width: 350px;
 }
