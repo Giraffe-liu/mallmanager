@@ -78,7 +78,7 @@
         </div>
     </el-dialog>
     <!-- 编辑用户的对话框 -->
-    <el-dialog title="编辑用户" :visible.sync="editDialog">
+    <el-dialog @close="formData={}" title="编辑用户" :visible.sync="editDialog">
         <el-form :model="formData">
             <el-form-item label="用户名" label-width="100px">
                 <el-input disabled v-model="formData.username" autocomplete="off"></el-input>
@@ -164,7 +164,7 @@ export default {
       const {meta: {msg, status}} = res.data
       if (status === 200) {
         this.loadData()
-        this.$message.success(msg)
+        this.$message.success(msg + '^O^')
         this.setRoleDialog = false
       } else {
         this.$message.error(msg)
@@ -189,7 +189,7 @@ export default {
         .then(res => {
           const {meta: {msg, status}} = res.data
           if (status === 200) {
-            this.$message.success(msg)
+            this.$message.success(msg + '^O^')
             this.editDialog = false
             this.formData = {}
             this.loadData()
@@ -214,7 +214,7 @@ export default {
         .then(res => {
           const {meta: {msg, status}} = res.data
           if (status === 201) {
-            this.$message.success(msg)
+            this.$message.success(msg + '^O^')
             this.addDialog = false
             this.formData = {}
             this.loadData()
@@ -225,7 +225,6 @@ export default {
     },
     // 渲染添加用户对话框
     addUserDialog () {
-      this.formData = {}
       this.addDialog = true
     },
     // 删除用户信息
@@ -241,7 +240,7 @@ export default {
         const {meta: {msg, status}} = res.data
         if (status === 200) {
           this.loadData()
-          this.$message.success(msg)
+          this.$message.success(msg + '^O^')
         }
       }).catch(() => {
         this.$message({
@@ -257,7 +256,7 @@ export default {
       const data = res.data
       const {meta: {msg, status}} = data
       if (status === 200) {
-        this.$message.success(msg)
+        this.$message.success(msg + '^O^')
       } else {
         this.$message.error(msg)
       }

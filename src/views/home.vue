@@ -18,68 +18,15 @@
     <el-container>
         <el-aside class="aside" width="200px">
             <el-menu default-active="1" :unique-opened="true" class="el-menu-vertical-demo menu" :router="true">
-                <el-submenu index="1">
+                <el-submenu v-for="(item, index) in menus" :key="item.id" :index="index + ''">
                     <template slot="title">
                         <i class="el-icon-location"></i>
-                        <span>用户管理</span>
+                        <span>{{item.authName}}</span>
                     </template>
                     <el-menu-item-group>
-                        <el-menu-item index="/user">
+                        <el-menu-item v-for="item1 in item.children" :key="item1.id" :index="item1.path">
                             <i class="el-icon-menu"></i>
-                            用户列表</el-menu-item>
-                    </el-menu-item-group>
-                </el-submenu>
-                <el-submenu index="2">
-                    <template slot="title">
-                        <i class="el-icon-location"></i>
-                        <span>权限管理</span>
-                    </template>
-                    <el-menu-item-group>
-                        <el-menu-item index="/role">
-                            <i class="el-icon-menu"></i>
-                            角色列表</el-menu-item>
-                        <el-menu-item index="/right">
-                            <i class="el-icon-menu"></i>
-                            权限列表</el-menu-item>
-                    </el-menu-item-group>
-                </el-submenu>
-                <el-submenu index="3">
-                    <template slot="title">
-                        <i class="el-icon-location"></i>
-                        <span>商品管理</span>
-                    </template>
-                    <el-menu-item-group>
-                        <el-menu-item index="3-1">
-                            <i class="el-icon-menu"></i>
-                            商品列表</el-menu-item>
-                        <el-menu-item index="3-2">
-                            <i class="el-icon-menu"></i>
-                            分类参数</el-menu-item>
-                        <el-menu-item index="3-3">
-                            <i class="el-icon-menu"></i>
-                            商品分类</el-menu-item>
-                    </el-menu-item-group>
-                </el-submenu>
-                <el-submenu index="4">
-                    <template slot="title">
-                        <i class="el-icon-location"></i>
-                        <span>订单管理</span>
-                    </template>
-                    <el-menu-item-group>
-                        <el-menu-item index="4-1">
-                            <i class="el-icon-menu"></i>
-                            订单列表</el-menu-item>
-                    </el-menu-item-group>
-                </el-submenu>
-                <el-submenu index="5">
-                    <template slot="title">
-                        <i class="el-icon-location"></i>
-                        <span>数据统计</span>
-                    </template>
-                    <el-menu-item-group>
-                        <el-menu-item index="5-1">
-                            <i class="el-icon-menu"></i>
-                            数据报表</el-menu-item>
+                            {{item1.authName}}</el-menu-item>
                     </el-menu-item-group>
                 </el-submenu>
             </el-menu>
@@ -93,6 +40,11 @@
 
 <script>
 export default {
+  data () {
+    return {
+      menus: []
+    }
+  },
   // 如果用户没登录就无法进入home页
   beforeCreate () {
     // 从sessionStorage中获取用户登录时存入的token信息
@@ -102,7 +54,16 @@ export default {
       this.message.warning('请先登录')
     }
   },
+  created () {
+    this.getAllMenu()
+  },
   methods: {
+    // 获取所有的menu值,动态设置侧边栏的展示
+    async getAllMenu () {
+      const res = await this.$http.get('menus')
+      console.log(res)
+      this.menus = res.data.data
+    },
     handleLoginOut () {
       if (confirm('确定要退出吗？')) {
         // 删除session中的token
